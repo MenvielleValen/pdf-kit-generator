@@ -1,4 +1,4 @@
-import puppeteer, { PDFOptions, PaperFormat } from "puppeteer";
+import puppeteer, { PDFOptions, PaperFormat} from "puppeteer";
 import path from "path";
 import * as fs from "fs";
 import hummus from "muhammara";
@@ -14,6 +14,7 @@ export interface IPageRenderData {
 export class PDFGenerator {
   private data: string;
   private pdfOptions: PDFOptions;
+  
 
   constructor(format: PaperFormat = "A4") {
     this.data = "";
@@ -62,7 +63,7 @@ export class PDFGenerator {
    * @param props - Parámetros para el navegador antes de generar el PDF.
    * @returns Buffer generado.
    */
-  public async generatePdf<T>(props?: T): Promise<Buffer> {
+  public async generatePdf<T>(props: T = {pageNumber: 1} as T): Promise<Buffer> {
     try {
       const browser = await puppeteer.launch({ headless: "new" });
       const page = await browser.newPage();
@@ -90,7 +91,7 @@ export class PDFGenerator {
    * @param props - Parámetros para el navegador antes de generar el PDF.
    * @returns ReadStream generado.
    */
-  public async generatePdfStream<T>(props?: T): Promise<fs.ReadStream> {
+  public async generatePdfStream<T>(props: T = {pageNumber: 1} as T): Promise<fs.ReadStream> {
     try {
       // Verifica si la carpeta temp existe, si no, créala
       const tempFolderPath = path.join(__dirname, "temp");
@@ -141,15 +142,16 @@ export class PDFGenerator {
   ): Promise<Buffer> {
     try {
       const buffers: Buffer[] = [];
-
+      let i: number = 0;
       for (const page of pageData) {
+        i++;
         if (page.templatePath) {
           await this.fromFile(page.templatePath);
         } else if (page.content) {
           this.data = page.content;
         }
         this.setPdfOptions(page.pdfOptions || {});
-        const file = await this.generatePdf({ ...page.props });
+        const file = await this.generatePdf({ pageNumber: i, ...page.props });
         buffers.push(file);
       }
 
