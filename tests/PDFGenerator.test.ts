@@ -1,4 +1,4 @@
-import { PDFGenerator } from "../PDFGenerator";
+import { PDFGenerator } from "../src/PDFGenerator";
 import path from "path";
 
 describe("PDFGenerator", () => {
